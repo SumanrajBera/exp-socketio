@@ -1,13 +1,14 @@
 import { Router } from "express";
 import userModel from "../models/auth.model";
 import jwt from 'jsonwebtoken'
+import { configApp } from "../config/config";
 
 const authRouter = Router()
 
 function sendToken(username, id, message, res, status) {
     const token = jwt.sign({
         username, id
-    }, process.env.JWT_SECRET, { expiresIn: "3d" })
+    }, configApp.JWT_SECRET, { expiresIn: "3d" })
     res.cookie("token", token)
     res.status(status).json({
         message

@@ -1,4 +1,4 @@
-import { config } from "dotenv";
+
 import httpServer from "./src/app.js";
 import io from "./src/socket.js";
 
