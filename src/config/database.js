@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { configApp } from "./config";
+import { configApp } from "./config.js";
 
 async function connectToDB() {
     try {
@@ -9,3 +9,5 @@ async function connectToDB() {
         console.log("Error connecting to DB", err)
     }
 }
+
+export default connectToDB;

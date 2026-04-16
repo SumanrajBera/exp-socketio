@@ -1,6 +1,6 @@
 import express from "express";
 import { createServer } from "http";
-import authRouter from "./routes/auth.route";
+import authRouter from "./routes/auth.route.js";
 import cookieParser from "cookie-parser";
 
 

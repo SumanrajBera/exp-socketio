@@ -5,11 +5,11 @@ const memberSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'ROOM'
     },
-    joined_by: {
+    user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'USER'
     }
-})
+}, { timestamps: true })
 
 const memberModel = mongoose.model("MEMBER", memberSchema)
 
