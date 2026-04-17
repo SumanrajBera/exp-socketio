@@ -90,6 +90,32 @@ io.on("connection", (socket) => {
             return socket.emit("room-error", { message: "Failed to join room" })
         }
     })
+
+    socket.on("start-dm", async (data) => {
+        try {
+            const { userId } = data;
+
+            const rooms = await memberModel.find({ user: socket.data.id }).populate("room");
+            const dmRooms = rooms.filter(member => member.room.type === "dm")
+            const dmRoomIds = dmRooms.map(member => member.room._id)
+            const existing = await memberModel.findOne({ room: { $in: dmRoomIds }, user: userId })
+
+            if (existing) {
+                socket.join(existing.room.toString())
+                return socket.emit("dm-success", { message: "Joining existing chat" })
+            }
+
+            const newRoom = await roomModel.create({ room_name: "Private chat", created_by: socket.data.id });
+            await memberModel.create({ room: newRoom._id, user: socket.data.id })
+            await memberModel.create({ room: newRoom._id, user: userId })
+
+            socket.join(newRoom._id.toString())
+            return socket.emit("dm-success", { message: "Connection made with user" })
+        } catch (err) {
+            return socket.emit("dm-error", { message: "Couldn't Connect to the user" })
+        }
+
+    })
 });
 
 export default io;
