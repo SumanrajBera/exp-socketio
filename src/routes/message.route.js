@@ -1,14 +1,18 @@
 import { Router } from "express";
 import chatModel from "../models/chat.model.js";
 import memberModel from "../models/membership.model.js";
+import jwt from "jsonwebtoken";
+import { configApp } from "../config/config.js";
 
 const messageRouter = Router()
 
 messageRouter.get("/:roomId", async (req, res) => {
     try {
-        const { roomId } = req.params
+        const { roomId } = req.params;
 
-        const isMember = await memberModel.findOne({ user: req.id, room: roomId })
+        const user = jwt.verify(req.cookies.token, configApp.JWT_SECRET)
+
+        const isMember = await memberModel.findOne({ user: user.id, room: roomId })
         if (!isMember) {
             return res.status(403).json({ message: "You are not a member of this room" })
         }

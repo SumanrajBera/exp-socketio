@@ -27,7 +27,7 @@ io.use((socket, next) => {
     }
 })
 
-io.on("connection", (socket) => {
+io.on("connection", async (socket) => {
     console.log("Connected to Socket.io server", socket.data.id, socket.data.username)
 
     const memberships = await memberModel.find({ user: socket.data.id })
@@ -116,6 +116,7 @@ io.on("connection", (socket) => {
             socket.join(newRoom._id.toString())
             return socket.emit("dm-success", { message: "Connection made with user" })
         } catch (err) {
+            console.log(err)
             return socket.emit("dm-error", { message: "Couldn't Connect to the user" })
         }
 
@@ -146,7 +147,7 @@ io.on("connection", (socket) => {
 
             await chatModel.create({ chat: message, room: roomId, created_by: socket.data.id });
 
-            return io.to(roomId.toString()).emit("message-success", { message })
+            return io.to(roomId.toString()).emit("message-success", { message, username: socket.data.username })
         } catch (err) {
             return socket.emit("message-error", { message: "Failed to send message" })
         }
