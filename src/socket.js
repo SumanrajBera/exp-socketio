@@ -30,6 +30,9 @@ io.use((socket, next) => {
 io.on("connection", (socket) => {
     console.log("Connected to Socket.io server", socket.data.id, socket.data.username)
 
+    const memberships = await memberModel.find({ user: socket.data.id })
+    memberships.forEach(membership => socket.join(membership.room.toString()))
+
     socket.on("create-room", async (data) => {
         try {
             const { room } = data;
