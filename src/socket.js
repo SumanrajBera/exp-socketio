@@ -6,6 +6,7 @@ import { parseCookie } from "cookie";
 import jwt from "jsonwebtoken";
 import { configApp } from "./config/config.js";
 import mongoose from "mongoose";
+import chatModel from "./models/chat.model.js";
 
 const io = new Server(httpServer, {});
 
@@ -115,6 +116,37 @@ io.on("connection", (socket) => {
             return socket.emit("dm-error", { message: "Couldn't Connect to the user" })
         }
 
+    })
+
+    socket.on("send-message", async (data) => {
+        try {
+            const { roomId, message } = data
+
+            if (!mongoose.Types.ObjectId.isValid(roomId)) {
+                return socket.emit("room-error", {
+                    message: "Invalid room id"
+                });
+            }
+
+            if (message === "") {
+                return socket.emit("message-error", {
+                    message: "Chat can't be empty"
+                })
+            }
+
+            const isMember = await memberModel.findOne({ user: socket.data.id, room: roomId });
+            if (!isMember) {
+                return socket.emit("room-error", {
+                    message: "You are not member of this room"
+                });
+            }
+
+            await chatModel.create({ chat: message, room: roomId, created_by: socket.data.id });
+
+            return io.to(roomId.toString()).emit("message-success", { message })
+        } catch (err) {
+            return socket.emit("message-error", { message: "Failed to send message" })
+        }
     })
 });
 
